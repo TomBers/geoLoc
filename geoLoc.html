@@ -1,0 +1,15 @@
+<head>
+  <title>map</title>
+</head>
+
+<body>
+  <h1>Where am I?</h1>
+  <div id="map"></div>
+  {{#each places}}
+  <h1>{{title}} : {{dist}}</h1>
+  {{/each}}
+
+  {{#if error}}
+    <p>Error: {{error.message}}</p>
+  {{/if}}
+</body>
