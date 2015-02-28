@@ -10,3 +10,4 @@ insecure
 mdg:geolocation
 fuatsengul:leaflet
 pauloborges:mapbox@2.1.4_3
+mdg:camera

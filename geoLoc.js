@@ -32,14 +32,16 @@ if (Meteor.isClient) {
           // console.log(place);
           var latlng = {lat:place.loc.geometry.coordinates[1] ,lng:place.loc.geometry.coordinates[0]}
           var dist = (fc.distanceTo(latlng)).toFixed(0) + 'm';
-          place.loc.properties.description = dist;
+          // place.loc.properties.description = dist;
           ord.push({title:place.loc.properties.title,dist:dist});
           ord.sort(function (a,b){
             if(parseInt(a.dist) > parseInt(b.dist)){return 1;}
             else{return -1;}
           })
           Session.set('ord',ord);
-          L.mapbox.featureLayer(place.loc).addTo(map);
+          var myLayer = L.mapbox.featureLayer(place.loc).addTo(map);
+
+
         });
       }
 
@@ -55,14 +57,17 @@ if (Meteor.isClient) {
     error: Geolocation.error,
     places:function(){
     return Session.get('ord');
-
-    }
+  }
+  // ,
+  // img:function(){
+  //   return Session.get('img');
+  // }
   });
 }
 
 
 
-function addMarker(lng,lat,name){
+function addMarker(lng,lat,name,img){
   var geeson = {
     // this feature is in the GeoJSON format: see geojson.org
     // for the full specification
@@ -72,21 +77,26 @@ function addMarker(lng,lat,name){
       // coordinates here are in longitude, latitude order because
       // x, y is the standard for GeoJSON and many formats
       coordinates: [lng,lat]
-
-
     },
     properties: {
       title: name,
-      description: 'Description',
-      // one can customize markers by adding simplestyle properties
-      // https://www.mapbox.com/guides/an-open-platform/#simplestyle
-      'marker-size': 'large',
-      'marker-color': '#115E4A',
-      'marker-symbol': 'embassy'
+      description: '<img src="'+img+'">',
+      'marker-symbol': "star",
+      'marker-size': "medium",
+      'marker-color': "#f44"
+
     }
   };
   Meteor.call('addPlace',geeson);
   L.mapbox.featureLayer(geeson).addTo(map);
+  var tmp = Session.get('ord');
+  var tdist = (fc.distanceTo({lat:lat ,lng:lng})).toFixed(0) + 'm';
+  tmp.push({title:name,dist:tdist});
+  tmp.sort(function (a,b){
+    if(parseInt(a.dist) > parseInt(b.dist)){return 1;}
+    else{return -1;}
+  })
+  Session.set('ord',tmp);
 
 
 }
@@ -99,7 +109,12 @@ function onMapClick(e) {
 
     var name = prompt("Please enter a name", "");
 if (name != null) {
-    addMarker(e.latlng.lng,e.latlng.lat,name);
+  var lg = e.latlng.lng;
+  var lt = e.latlng.lat;
+  MeteorCamera.getPicture({width:100,height:100,quality:100},function(err,img){
+    addMarker(lg,lt,name,img);
+  });
+
   }
     // console.log(e.latlng);
     // alert((fc.distanceTo(e.latlng)).toFixed(0) + 'm');
